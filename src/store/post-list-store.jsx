@@ -3,6 +3,7 @@ import { createContext, useReducer } from "react";
 export const PostList = createContext({
   postListValue: [],
   addPostValue: () => {},
+  addInitialPostsValue: () => {},
   deletePostValue: () => {},
 });
 
@@ -12,6 +13,8 @@ const postListReducer = (currPostList, action) => {
     newPostList = currPostList.filter(
       (post) => post.id !== action.payload.postIdPayLoad
     );
+  } else if (action.type === "ADD_INITIAL_POSTS") {
+    newPostList = action.payload.postsPayload;
   } else if (action.type === "ADD_POST") {
     newPostList = [action.payload, ...currPostList];
   }
@@ -19,13 +22,9 @@ const postListReducer = (currPostList, action) => {
 };
 
 const PostListProvider = ({ children }) => {
-  const [postList, dispatchPostList] = useReducer(
-    postListReducer,
-    DEFAULT_POST_LIST
-  );
+  const [postList, dispatchPostList] = useReducer(postListReducer, []);
 
   const addPost = (userId, postTitle, body, reactions, tags) => {
-    console.log(`${userId} ${postTitle} ${body} ${reactions} ${tags}`);
     dispatchPostList({
       type: "ADD_POST",
       payload: {
@@ -35,6 +34,15 @@ const PostListProvider = ({ children }) => {
         reactions: reactions,
         userId: userId,
         tags: tags,
+      },
+    });
+  };
+
+  const addInitialPosts = (posts) => {
+    dispatchPostList({
+      type: "ADD_INITIAL_POSTS",
+      payload: {
+        postsPayload: posts,
       },
     });
   };
@@ -54,6 +62,7 @@ const PostListProvider = ({ children }) => {
       value={{
         postListValue: postList,
         addPostValue: addPost,
+        addInitialPostsValue: addInitialPosts,
         deletePostValue: deletePost,
       }}
     >
@@ -61,24 +70,5 @@ const PostListProvider = ({ children }) => {
     </PostList.Provider>
   );
 };
-
-const DEFAULT_POST_LIST = [
-  {
-    id: "1",
-    title: "Going to Bhutan",
-    body: "hello friends, Is anyone interested in travelling to Bhutan along with me, just DM me",
-    reactions: 2,
-    userId: "user-90",
-    tags: ["vacation", "Bhutan"],
-  },
-  {
-    id: "2",
-    title: "Got Placed ",
-    body: "Finally got job offer from dream company",
-    reactions: 28,
-    userId: "user-9",
-    tags: ["unbelieveable", "satisfaction"],
-  },
-];
 
 export default PostListProvider;
